@@ -52,6 +52,7 @@ def preprocess_data(filepath):
 train_data = preprocess_data('JAIST-intern-data/MRPC_train.txt')
 
 # Extract features and labels for training
+print("Extracting features and labels for training...")
 X_train_concat = np.array([create_combined_vector(row['#1 String'], row['#2 String'], method='concatenation') for _, row in train_data.iterrows()])
 X_train_mean = np.array([create_combined_vector(row['#1 String'], row['#2 String'], method='mean') for _, row in train_data.iterrows()])
 X_train_max = np.array([create_combined_vector(row['#1 String'], row['#2 String'], method='max_pooling') for _, row in train_data.iterrows()])
@@ -61,6 +62,7 @@ y_train = train_data['Quality']
 kernels = ['rbf', 'linear', 'poly', 'sigmoid']
 svm_models = {}
 
+print("Training SVM models...")
 for kernel in kernels:
     svm_concat = SVC(kernel=kernel)
     svm_concat.fit(X_train_concat, y_train)
@@ -76,17 +78,20 @@ for kernel in kernels:
     svm_max.fit(X_train_max, y_train)
     svm_models[f'max_{kernel}'] = svm_max
     joblib.dump(svm_max, os.path.join(results_dir, f'svm_max_{kernel}.joblib'))  # Save the model
+print("Training complete.")
 
 # Load the test data
 test_data = preprocess_data('JAIST-intern-data/MRPC_test.txt')
 
 # Extract test features and labels
+print("Extracting features and labels for testing...")
 X_test_concat = np.array([create_combined_vector(row['#1 String'], row['#2 String'], method='concatenation') for _, row in test_data.iterrows()])
 X_test_mean = np.array([create_combined_vector(row['#1 String'], row['#2 String'], method='mean') for _, row in test_data.iterrows()])
 X_test_max = np.array([create_combined_vector(row['#1 String'], row['#2 String'], method='max_pooling') for _, row in test_data.iterrows()])
 y_test = test_data['Quality']
 
 # Evaluate models and save results to CSV
+print("Evaluating models...")
 results = []
 
 for method in ['concat', 'mean', 'max']:
@@ -102,7 +107,7 @@ for method in ['concat', 'mean', 'max']:
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
         results.append({'Method': method, 'Kernel': kernel, 'Accuracy': accuracy})
-
+print("Evaluation complete.")
 # Convert results to DataFrame and save to CSV
 results_df = pd.DataFrame(results)
 results_df.to_csv(os.path.join(results_dir, 'svm_evaluation_results.csv'), index=False)
