@@ -1,0 +1,502 @@
+[JAIST Internship program]
+Paraphrase Identification using Sentence BERT and Data Augmentation
+
+1 Goal
+
+Paraphrase identification is a task to identify whether two sentences
+are semantically equivalent or not. Here are some examples:
+
+  <equivalent>
+  (1) The processors were announced in San Jose at the Intel Developer Forum.
+  (2) The new processor was unveiled at the Intel Developer Forum 2003 in San Jose.
+
+  <non-equivalent>
+  (1) He beat testicular cancer that had spread to his lungs and brain.
+  (2) Armstrong, 31, battled testicular cancer that spread to his brain.
+  # Although many words are overlapped, the meanings of two sentences
+  # are clearly different.
+
+Paraphrase identification is the important task of natural language
+understanding, that can be used for various natural language
+processing (NLP) applications.
+
+Recently, a method called Sentence BERT (Bidirectional Encoder
+Representations from Transformers) is paid much attention.
+Sentence BERT is a model to pre-train sentence embedding from a huge
+amount of texts. ``sentence embedding'' is a vector representation of
+a meaning of a sentence.
+
+On the other hand, paraphrase identification is usually solved by
+supervised machine learning. The labeled data, the pairs of sentences
+labeled whether they are equivalent or not in the case of paraphrase
+identification, is required for machine learning. However, much cost
+is required to manually construct the labeled data. So it is rather
+hard to prepare a large-scale training data. Data augmentation is a
+method to tackle this problem. It is a technique to automatically
+generate the training samples to increase the size of the training
+data.
+
+The goal of this internship is to evaluate the performance of Sentence
+BERT when it is applied for paraphrase identification, and also
+evaluate the effectiveness of the data augmentation. Two research
+questions are:
+
+  RQ1. How accurately can Sentence BERT identify the semantic
+       similarity of two sentences?
+  RQ2. Which techniques of data augmentation are effective for the
+       paraphrase identification model using Sentence BERT?
+
+
+
+2 Task definition
+
+Let us review the definition of the task. For given two sentences, we
+aim at identifying whether the meanings of them are equivalent or not
+(two sentences have almost the same meanings or not).
+
+Input: sentence1 sentence2
+  `sentence1' and `sentence2' are English sentences.
+
+Output: class
+  Here the class is `equivalent' or `non-equivalent'
+
+
+
+3 Dataset
+
+The MRPC (Microsoft Research Paraphrase Corpus) dataset is used for
+this study. This is a corpus of sentence pairs automatically extracted
+from online news sources, with human annotations for whether the
+sentences in the pair are semantically equivalent.
+
+The following files are distributed to you.
+
+* MRPC_train.txt
+  It is the training data. It consists of 4076 sentence pairs with
+  `equivalent' or `non-equivalent' labels.
+
+  The file is in the format of tab-separated values (TSV) containing
+  the following 5 fields, where `\t' represents a tab.
+
+    Quality \t #1 ID \t #2 ID \t #1 String \t #2 String
+
+  Quality:   1 (equivalent) or 0 (non-equivalent)
+  #1 ID:     ID of sentence 1
+  #2 ID:     ID of sentence 2
+  #1 String: the first sentence (sentence 1)
+  #2 String: the second sentence (sentence 2)
+
+  <example>
+  1 \t 2405153 \t 2405189 \t The processors were announced in San Jose at the Intel Developer Forum. \t The new processor was unveiled at the Intel Developer Forum 2003 in San Jose.
+  0 \t 2321401 \t 2321455 \t He beat testicular cancer that had spread to his lungs and brain. \t Armstrong, 31, battled testicular cancer that spread to his brain.
+
+* MRPC_test.txt
+  It is a test data. It consists of 1725 sentence pairs. The format is
+  the same as in `MRPC_train.txt'.
+
+# The details of the following files will be explained later.
+
+* example-sbert.py
+  Sample program of Sentence BERT
+
+* example-nltk.py
+  Sample program of NLTK library
+
+* example-bt.py
+  Sample program of backtranslation
+
+* example-spacy.py
+  Sample program of spaCy
+
+* PPDB-2.0-lexical.txt
+  The database called PPDB (Paraphrase Database)
+
+
+
+4 Training of paraphrase identification model
+
+We train a model for paraphrase identification using Sentence BERT.
+We use Python as the programming language.
+
+ 4.1 Setup of Sentence BERT
+
+ Install Python modules required for using Sentence BERT.  You can do
+ it by the following command.
+ 
+   pip install sentence_transformers
+
+ # If you do not have administrator privilege to install Python
+ # modules, you can use the virtual environment for Python.
+ # See the following URLs for details.
+ #   https://docs.python.org/3/library/venv.html
+ #   https://itnext.io/a-quick-guide-on-how-to-setup-a-python-virtual-environment-windows-linux-mac-bf662c2c77d3
+
+ Check if you can successfully install necessary Python modules by
+ running the sample program `sample_sbert.py'.
+
+   python sample_sbert.py
+  
+
+ 4.2 Making vector of sentence pair
+
+ In this step, you make a vector for two sentences.
+
+ First, obtain a vector of a single sentence by simply using Sentence
+ BERT. Let us suppose `s1' and `s2' are two sentences, and `vec(s1)'
+ and `vec(s2)' are vectors of s1 and s2.
+ 
+ Next, the sentence pair (s1 and s2) should be represented by a single
+ vector. You can use several methods.
+
+ (1) Concatenation
+  Obtain a new vector by concatenating vec(s1) and vec(s2). Since the
+  number of the dimensions of Sentence BERT is 768, that of the new
+  vector will be 1536.
+
+ (2) Mean
+  Obtain a new vector by take an average of two vectors:
+    ( vec(s1) + vec(s2) ) / 2
+
+ (3) Max pooling
+  Obtain a new vector by choosing the maximum of two values in vec(s1)
+  and vec(s2) for each dimension as
+    max( vec1[i], vec2[i] )  for 1 <= i <= 768
+  , where vec1[i] and vec2[i] are values of i-th dimension of vec(s1)
+  and vec(s2).
+
+
+ 4.3 Training classification model
+
+ In this study, we use Support Vector Machine (SVM) for supervised
+ machine learning. `MRPC_train.txt' is used as the training data. To
+ train SVM, each sample in the training data should be represented by
+ a vector. We use the vector obtained in Section 4.2.
+
+ We can use sciket-learn to train SVM. See the following webpage for
+ details.
+   https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+
+ SVM can be trained by four kernel functions:
+  (1) RBF kernel            sklearn.svm.SVC(kernel='rbf')
+  (2) Linear kernel         sklearn.svm.SVC(kernel='linear')
+  (3) Polynomial kernel     sklearn.svm.SVC(kernel='poly')
+  (4) Sigmoid kernel        sklearn.svm.SVC(kernel='sigmoid')
+ Use all four kernels to train SVM and compare them.
+
+ There are several parameters for training of SVM. We use default
+ values for them.
+
+
+ 4.4 Evaluation
+
+ After training the SVM, apply it for the test data `MRPC_test.txt'.
+ That is, judge whether two sentences in the  test data are equivalent
+ or not using the trained SVM.
+
+ You measure the accuracy to evaluate the performance of SVM. It is
+ defined as follows:
+ 
+              number of the correctly identified samples
+   accuracy = ------------------------------------------
+              number of all samples in the test data
+
+ Compare the accuracy of SVMs using three different vectors (explained
+ in subsection 4.2) and four kernel functions (explained in subsection
+ 4.3).
+
+
+
+5 Training of baseline model
+
+In the NLP research fields, the `bag-of-words' is a standard model to
+train classification model (paraphrase identification in this study),
+where words in a sentence are used for features of machine learning.
+We implement it as the baseline model and compare it with the model
+using Sentence BERT.
+
+ 5.1 Conversion sentence to word list.
+
+ For samples in the training and test data, sentences are converted the
+ list of words by the following steps:
+ - Tokenization
+   A sentence is split into a list of words. Note that symbols such as
+   a period and a comma should be separated.
+   e.g. `you.' => `you .'   `her,' => `her ,'
+ - Conversion to lower cases
+   All upper case letter should be converted to the lower case.
+ - Stemming
+   Convert an inflected word to its stem (base form).
+   e.g. `likes' => `like'
+ - Removal stopwords
+   `Stopword' is a functional word that does not have a meaning but
+   plays a grammatical role. Examples of stopwords are `a', `an',
+   `the', `in', 'on', and so on. Since stopwords are independent to
+   the paraphrase identification, they should be removed from the
+   sentence.
+
+  <example>
+  data1-s1: It is fine today.
+  data1-s2: Today's weather is fine.
+  data2-s1: Jane likes dogs and Mike likes cat.
+  data2-s2: Tom likes rainy weather but Sue not.
+      vvvvv
+  data1-s1: [fine today]
+  data1-s2: [today 's weather fine]
+  data2-s1: [jane like dog mike like cat]
+  data2-s2: [tom like rainy weather sue]
+
+ We use NLTK package for the above procedures. NLTK package can be
+ installed by the following command.
+    pip install nltk
+
+ See the sample program `example-nltk.py' to know how to use NLTK package.
+
+ 5.2 Making feature list
+
+ A list of features should be created for a given sentence pairs. The
+ list of the words of the first sentence (s1) and second sentence (s2)
+ are concatenated. Furthermore, to distinguish two sentences, the
+ suffix `/s1' and `/s2' should be added to the words.
+
+  <example>
+  data1-s1: [fine today]
+  data1-s2: [today 's weather fine]
+  data2-s1: [jane like dog mike like cat]
+  data2-s2: [tom like rainy weather sue]
+       vvvvv
+  data1: [fine/s1 today/s1 today/s2 's/s2 weather/s2 fine/s2]
+  data2: [jane/s1 like/s1 dog/s1 mike/s1 like/s1 cat/s1 tom/s2 like/s2 rainy/s2 weather/s2 sue/s2]
+ 
+ 5.3 Making dictionary of feature
+
+ We create a dictionary that defines a unique number ID for each
+ feature. The dictionary should contain all features appearing in both
+ the training and test data.
+
+  <example>
+  fine/s1    : 0
+  today/s1   : 1
+  today/s2   : 2
+  's/s2      : 3
+  weather/s2 : 4
+  fine/s2    : 5
+  jane/s1    : 6
+  like/s1    : 7
+  dog/s1     : 8
+  mike/s1    : 9
+  cat/s1     : 10
+  tom/s2     : 11
+  like/s2    : 12
+  rainy/s2   : 13
+  sue/s2     : 14
+ 
+ 5.4 Make vector of sentence pair
+
+ Using the dictionary made in subsection 5.3, the list of the features
+ obtained in subsection 5.2 is converted to the vector. The dimension
+ and value of the vector are as follows:
+  Vector dimension: each feature (i-th dimension = i-th feature in the dictionary)
+  Value of vector: frequency in the sentence pair
+
+  <example>
+  data1: [fine/s1 today/s1 today/s2 's/s2 weather/s2 fine/s2]
+  data2: [jane/s1 like/s1 dog/s1 mike/s1 like/s1 cat/s1 tom/s2 like/s2 rainy/s2 weather/s2 sue/s2]
+       vvvvv
+  data1: [1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0]
+  data2: [0 0 0 0 1 0 1 2 1 1 1 1 1 1 1 1]
+
+ The size of the vector (the number of the dimensions) is equal to the
+ number of the features in the training and test data.
+ 
+ 5.5 Training SVM, Evaluation
+
+ Train SVM using the vectors, obtained by the above procedures, in the
+ training data. As in Subsection 4.3, four kernel functions are used
+ and compared. Apply the trained SVMs for the test data, then measure
+ the accuracy.
+
+
+
+6 Data Augmentation
+
+Data augmentation is a technique to automatically generate new
+training samples by slightly changing existing samples. In this study,
+we use the following four (or five) methods for data augmentation.
+
+ 6.1 Synonym Substitution
+
+ It substitutes some words with their synonyms to generate new
+ samples.
+
+  <original sample>
+  s1: Tom took a picture of Mt. Fuji.
+  s2: Tom photographed the highest mountain in Japan.
+  label: 1
+
+  <new sample>
+  s1: Tom took a photo of Mt. Fuji.
+  s2: Tom photographed the highest mountain in Japan.
+  label: 1
+  # Note that `photo' is a synonym of `picture'.
+ 
+ We can obtain synonyms of a given word using WordNet, which is an
+ English thesaurus. See the following webpage to know how to use
+ WordNet in Python.
+   https://www.nltk.org/howto/wordnet.html
+
+
+ 6.2 Word Paraphrase
+
+ It substitutes some words with similar or related words (so-called
+ paraphrase).
+ 
+  <original sample>
+  s1: Tom bought clothing at the shop.
+  s2: Tom bought a t-shirt at the shop.
+  label: 1
+
+  <new sample>
+  s1: Tom bought clothing at the shop.
+  s2: Tom bought a shirt at the shop.
+  label: 1
+  # Note that `t-shirt' and `shirt' are similar words.
+
+ We can obtain paraphrase using PPDB (Paraphrase Database).
+ `PPDB-2.0-lexical.txt' is a file of PPDB. Each line is denoted as
+     word1 \t word2 \t relation_type
+ , where `word1' and `word2' are a pair of the paraphrase.
+
+  <example of paraphrase in PPDB>
+  transplant      transplantation OtherRelated
+  not-for-profit  non-profit      Equivalence
+  mediaeval       medieval        Equivalence
+
+
+ 6.3 BackTranslation
+
+ It translates a given English sentence into German and back to
+ English. We use an online machine translation service such as Google
+ translation.
+
+ We can use `BackTranslation' module to implement the backtranslation
+ in Python. Install this module by the following command:
+   pip install BackTranslation
+
+ See the following webpage for details:
+   https://pypi.org/project/BackTranslation/
+ See also the sample program `example-bt.py'. Note that
+ - set the parameter tmp='de' to choose German as the intermediate
+   language.
+ - set the parameter sleeping=1 to prevent from frequent access of
+   Google translation server, otherwise the access will be banned.
+
+
+ 6.4 Random Word Deletion
+
+ It randomly removes a word with a given probability P (by default
+ 0.25). Due to the destructive nature of the transformation, it is
+ likely that the meaning of a sequence may be changed as a result of
+ the change.
+
+  <original sample>
+  s1: Tom took a picture of Mt. Fuji.
+  s2: Tom photographed the highest mountain in Japan.
+  label: 1
+ 
+  <new sample>
+  s1: Tom took picture of Fuji.
+  s2: Tom photographed the mountain Japan.
+  label: 0
+
+ Note that it can be used to generate non-equivalent samples (label=0)
+ from equivalent samples (label=1).
+ 
+
+ 6.5 Subject Object Switch
+ (This section is advanced. You can skip it.)
+
+ It switches the subject and object of English sentences to generate
+ new sentences with a very high surface similarity but very different
+ meaning.
+ 
+  <original sample>
+  s1: Tom took a picture of Mt. Fuji.
+  s2: Tom photographed the highest mountain in Japan.
+  label: 1
+ 
+  <new sample>
+  s1: picture took a Tom of Mt. Fuji.
+  s2: Tom photographed the highest mountain in Japan.
+  label: 0
+
+ Note that it can be used to generate non-equivalent samples (label=0)
+ from equivalent samples (label=1).
+
+  6.5.1 Dependency parsing
+  We perform the dependency parsing of the sentence using spaCy.
+  First, setup the spaCy library for Python as:
+    pip install spacy
+
+  Next, download spaCy English model as:
+    python -m spacy download en_core_web_sm
+
+  Now we can perform the dependency parsing. See the following webpage
+  and the sample program `example-spacy.py' for details.
+    https://towardsdatascience.com/natural-language-processing-dependency-parsing-cf094bbbe3f7
+
+  6.5.2 Finding subject and object
+  We find a subject and an object for a verb from the results of
+  dependency parsing. Specifically, we find `nsubj' relation and
+  `dobj' relation where the head word is the same verb.
+
+   <example>
+   Tom took a picture of Mt. Fuji.
+
+   Tom =(nsubj)=> took
+   picture =(dobj)=> took
+
+   # `Tom' is the subject of `took', and `picture' is the object of `took'.
+
+  6.5.3 Exchange the subject and object
+  After finding the subject and object, they are exchanged in the
+  original sentence.
+  
+   <example>
+    Tom took a picture of Mt. Fuji.
+    => picture took a Tom of Mt. Fuji.
+
+
+ 6.6 Training SVM with extended training data
+
+ First, generate new training samples by one (or all) data
+ augmentation method. They are added to the training data. That is,
+ the new training data consists of the original samples and newly
+ generated samples.
+
+ Then, train SVM with the extended training data, apply it for the
+ test data, and measure the accuracy.
+
+
+ 6.7 Evaluation of data augmentation
+
+ Compare the accuracy of the models trained by the original and
+ extended training data for each data augmentation method.
+
+ Compare the number of generated samples for each data augmentation
+ method. That is, evaluate how large the size of the original training
+ data is increased.
+ 
+ Also evaluate the case where all data augmentation methods are
+ applied.
+
+
+
+7 Report
+
+As the final outcome of this internship, you have to write a report.
+Please describe a goal, methods (what you did), and results. Please
+make a PDF file in A4 size. There is no template for the report; any
+format is acceptable.
+
+
+END
