@@ -7,8 +7,8 @@ import joblib
 import os
 
 # Data directory
-train_dir = 'JAIST-intern-data/testrun_train.txt'
-test_dir = 'JAIST-intern-data/testrun_train.txt'
+train_dir = 'JAIST-intern-data/MRPC_train.txt'
+test_dir = 'JAIST-intern-data/MRPC_test.txt'
 
 # Create the results directory
 results_dir = 'results/train_test_results_bow'
@@ -58,6 +58,7 @@ def preprocess_data_bow(filepath):
     return pd.DataFrame(clean_data)
 
 # Preprocess the training and test data for bag-of-words
+print("Preprocessing data for bag-of-words...")
 train_data_bow = preprocess_data_bow(train_dir)
 test_data_bow = preprocess_data_bow(test_dir)
 
@@ -66,6 +67,7 @@ def make_feature_list(row):
     features = [word + '/s1' for word in row['#1 String']] + [word + '/s2' for word in row['#2 String']]
     return features
 
+print("Making feature lists for bag-of-words...")
 train_data_bow['Features'] = train_data_bow.apply(make_feature_list, axis=1)
 test_data_bow['Features'] = test_data_bow.apply(make_feature_list, axis=1)
 
@@ -82,6 +84,7 @@ def create_feature_dictionary(train_data, test_data):
                 idx += 1
     return feature_dict
 
+print("Creating feature dictionary for bag-of-words...")
 feature_dict = create_feature_dictionary(train_data_bow, test_data_bow)
 
 # Make Vector of Sentence Pair
@@ -92,12 +95,14 @@ def vectorize_features(features, feature_dict):
             vector[feature_dict[feature]] += 1
     return vector
 
+print("Vectorizing features for bag-of-words...")
 train_vectors_bow = np.array([vectorize_features(features, feature_dict) for features in train_data_bow['Features']])
 test_vectors_bow = np.array([vectorize_features(features, feature_dict) for features in test_data_bow['Features']])
 y_train_bow = train_data_bow['Quality'].astype(int)
 y_test_bow = test_data_bow['Quality'].astype(int)
 
 # Training SVM and Evaluation
+print("Training SVM models for bag-of-words...")
 kernels = ['rbf', 'linear', 'poly', 'sigmoid']
 svm_models_bow = {}
 
@@ -108,6 +113,7 @@ for kernel in kernels:
     joblib.dump(svm, os.path.join(results_dir, f'bow_{kernel}.joblib'))  # Save the model
 
 # Evaluate models and save results to CSV
+print("Evaluating SVM models for bag-of-words...")
 results_bow = []
 
 for kernel in kernels:
@@ -117,6 +123,7 @@ for kernel in kernels:
     results_bow.append({'Method': 'bag-of-words', 'Kernel': kernel, 'Accuracy': accuracy_bow})
 
 # Convert results to DataFrame and save to CSV
+print("Saving evaluation results for bag-of-words...")
 results_df_bow = pd.DataFrame(results_bow)
 results_df_bow.to_csv(os.path.join(results_dir, 'bow_evaluation_results.csv'), index=False)
 
