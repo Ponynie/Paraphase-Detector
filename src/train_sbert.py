@@ -7,7 +7,7 @@ import joblib
 import os
 
 # Create the results directory
-results_dir = 'train_test_results'
+results_dir = 'results/train_test_results_sbert'
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
@@ -110,7 +110,7 @@ for method in ['concat', 'mean', 'max']:
 print("Evaluation complete.")
 # Convert results to DataFrame and save to CSV
 results_df = pd.DataFrame(results)
-results_df.to_csv(os.path.join(results_dir, 'svm_evaluation_results.csv'), index=False)
+results_df.to_csv(os.path.join(results_dir, 'sbert_evaluation_results.csv'), index=False)
 
 # Print results
 for index, row in results_df.iterrows():
