@@ -6,8 +6,12 @@ from sklearn.metrics import accuracy_score
 import joblib
 import os
 
+# Data directory
+train_dir = '../JAIST-intern-data/MRPC_test.txt'
+test_dir = '../JAIST-intern-data/MRPC_train.txt'
+
 # Create the results directory
-results_dir = 'results/train_test_results_sbert'
+results_dir = '../results/train_test_results_sbert'
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
@@ -49,7 +53,7 @@ def preprocess_data(filepath):
     return pd.DataFrame(clean_data)
 
 # Preprocess and load the training data
-train_data = preprocess_data('JAIST-intern-data/MRPC_train.txt')
+train_data = preprocess_data(train_dir)
 
 # Extract features and labels for training
 print("Extracting features and labels for training...")
@@ -60,28 +64,28 @@ y_train = train_data['Quality']
 
 # Train SVM models with different kernels
 kernels = ['rbf', 'linear', 'poly', 'sigmoid']
-svm_models = {}
+svm_models_sbert = {}
 
 print("Training SVM models...")
 for kernel in kernels:
     svm_concat = SVC(kernel=kernel)
     svm_concat.fit(X_train_concat, y_train)
-    svm_models[f'concat_{kernel}'] = svm_concat
-    joblib.dump(svm_concat, os.path.join(results_dir, f'svm_concat_{kernel}.joblib'))  # Save the model
+    svm_models_sbert[f'concat_{kernel}'] = svm_concat
+    joblib.dump(svm_concat, os.path.join(results_dir, f'sbert_concat_{kernel}.joblib'))  # Save the model
 
     svm_mean = SVC(kernel=kernel)
     svm_mean.fit(X_train_mean, y_train)
-    svm_models[f'mean_{kernel}'] = svm_mean
-    joblib.dump(svm_mean, os.path.join(results_dir, f'svm_mean_{kernel}.joblib'))  # Save the model
+    svm_models_sbert[f'mean_{kernel}'] = svm_mean
+    joblib.dump(svm_mean, os.path.join(results_dir, f'sbert_mean_{kernel}.joblib'))  # Save the model
 
     svm_max = SVC(kernel=kernel)
     svm_max.fit(X_train_max, y_train)
-    svm_models[f'max_{kernel}'] = svm_max
-    joblib.dump(svm_max, os.path.join(results_dir, f'svm_max_{kernel}.joblib'))  # Save the model
+    svm_models_sbert[f'max_{kernel}'] = svm_max
+    joblib.dump(svm_max, os.path.join(results_dir, f'sbert_max_{kernel}.joblib'))  # Save the model
 print("Training complete.")
 
 # Load the test data
-test_data = preprocess_data('JAIST-intern-data/MRPC_test.txt')
+test_data = preprocess_data(test_dir)
 
 # Extract test features and labels
 print("Extracting features and labels for testing...")
@@ -92,11 +96,11 @@ y_test = test_data['Quality']
 
 # Evaluate models and save results to CSV
 print("Evaluating models...")
-results = []
+results_sbert = []
 
 for method in ['concat', 'mean', 'max']:
     for kernel in kernels:
-        model = svm_models[f'{method}_{kernel}']
+        model = svm_models_sbert[f'{method}_{kernel}']
         if method == 'concat':
             X_test = X_test_concat
         elif method == 'mean':
@@ -106,12 +110,12 @@ for method in ['concat', 'mean', 'max']:
         
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        results.append({'Method': method, 'Kernel': kernel, 'Accuracy': accuracy})
+        results_sbert.append({'Method': method, 'Kernel': kernel, 'Accuracy': accuracy})
 print("Evaluation complete.")
 # Convert results to DataFrame and save to CSV
-results_df = pd.DataFrame(results)
-results_df.to_csv(os.path.join(results_dir, 'sbert_evaluation_results.csv'), index=False)
+results_df_sbert = pd.DataFrame(results_sbert)
+results_df_sbert.to_csv(os.path.join(results_dir, 'sbert_evaluation_results.csv'), index=False)
 
 # Print results
-for index, row in results_df.iterrows():
+for index, row in results_df_sbert.iterrows():
     print(f"Method: {row['Method']}, Kernel: {row['Kernel']}, Accuracy: {row['Accuracy']}")
