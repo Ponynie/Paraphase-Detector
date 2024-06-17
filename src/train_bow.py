@@ -7,11 +7,11 @@ import joblib
 import os
 
 # Data directory
-train_dir = '../JAIST-intern-data/testrun_train.txt'
-test_dir = '../JAIST-intern-data/testrun_train.txt'
+train_dir = 'JAIST-intern-data/testrun_train.txt'
+test_dir = 'JAIST-intern-data/testrun_train.txt'
 
 # Create the results directory
-results_dir = '../results/train_test_results_bow'
+results_dir = 'results/train_test_results_bow'
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
@@ -27,10 +27,19 @@ from nltk.stem import PorterStemmer
 stop_words = set(stopwords.words('english'))
 ps = PorterStemmer()
 
-def preprocess_sentence(sentence):
-    words = word_tokenize(sentence)
-    words = [ps.stem(word.lower()) for word in words if word.isalnum() and word.lower() not in stop_words]
-    return words
+def preprocess_sentence(sentence, order='stem/stop'):
+    if order == 'stop/stem':
+        words = word_tokenize(sentence)
+        words = [ps.stem(word.lower()) for word in words if word.lower() not in stop_words]
+        return words
+    elif order == 'stem/stop':
+        words = word_tokenize(sentence)
+        words = [ps.stem(w.lower()) for w in words]
+        words = [w for w in words if w not in stop_words]
+        return words
+    else:
+        raise ValueError(f"Invalid order: {order}")
+
 
 def preprocess_data_bow(filepath):
     clean_data = {'Quality': [], '#1 ID': [], '#2 ID': [], '#1 String': [], '#2 String': []}
