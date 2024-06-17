@@ -7,11 +7,11 @@ import joblib
 import os
 
 # Data directory
-train_dir = '../JAIST-intern-data/MRPC_test.txt'
-test_dir = '../JAIST-intern-data/MRPC_train.txt'
+train_dir = 'JAIST-intern-data/MRPC_test.txt'
+test_dir = 'JAIST-intern-data/MRPC_train.txt'
 
 # Create the results directory
-results_dir = '../results/train_test_results_sbert'
+results_dir = 'results/train_test_results_sbert'
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
