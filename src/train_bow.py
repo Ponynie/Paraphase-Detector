@@ -12,8 +12,8 @@ test_dir = 'JAIST-intern-data/MRPC_test.txt'
 
 # Create the results directory
 results_dir = 'results/train_test_results_bow'
-if not os.path.exists(results_dir):
-    os.makedirs(results_dir)
+# if not os.path.exists(results_dir):
+#     os.makedirs(results_dir)
 
 # Conversion of Sentence to Word List
 import nltk
