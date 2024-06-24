@@ -13,7 +13,7 @@ def process_dataset(dataset_type, base_data_dir, base_results_dir, augmented_dat
         test_dir = os.path.join(base_data_dir, dataset_type, dataset, f'{prefix}_{dataset_type.split("_")[0]}_test.txt') #! TEST
         results_dir = os.path.join(base_results_dir, dataset_type, dataset)
         
-        pipeline = NLPPipeline(train_dir, test_dir, results_dir, save_models=False)
+        pipeline = NLPPipeline(train_dir, test_dir, results_dir, prefix=prefix, save_models=False)
         pipeline.execute() 
         
         print(f"Completed processing for {dataset_type} - {dataset}\n")

@@ -15,16 +15,23 @@ from collections import defaultdict
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 
+class NLPStaticComponents:
+    stop_words = set(stopwords.words('english'))
+    ps = PorterStemmer()
+    sbert_model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+    kernels = ['rbf', 'linear', 'poly', 'sigmoid']
+    
 class NLPPipeline:
-    def __init__(self, train_path, test_path, results_dir, save_models=False):
+    def __init__(self, train_path, test_path, results_dir, prefix, save_models=False):
         self.train_path = self.ensure_relative_path(train_path)
         self.test_path = self.ensure_relative_path(test_path)
         self.results_dir = self.ensure_relative_path(results_dir)
-        self.stop_words = set(stopwords.words('english'))
-        self.ps = PorterStemmer()
-        self.sbert_model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-        self.kernels = ['rbf', 'linear', 'poly', 'sigmoid']
+        self.stop_words = NLPStaticComponents.stop_words
+        self.ps = NLPStaticComponents.ps
+        self.sbert_model = NLPStaticComponents.sbert_model
+        self.kernels = NLPStaticComponents.kernels
         self.save_models = save_models
+        self.prefix = prefix
 
     def ensure_relative_path(self, path):
         current_dir = os.path.dirname(__file__)
@@ -106,7 +113,7 @@ class NLPPipeline:
             svm.fit(train_vectors, y_train)
             svm_models[kernel] = svm
             if self.save_models:
-                joblib.dump(svm, os.path.join(self.results_dir, f'{tag}_{kernel}.joblib'))
+                joblib.dump(svm, os.path.join(self.results_dir, f'{tag}_{kernel}.joblib')) # Save the model
         
         for kernel in self.kernels:
             model = svm_models[kernel]
@@ -134,7 +141,7 @@ class NLPPipeline:
         y_train = train_data['Quality'].astype(int)
         y_test = test_data['Quality'].astype(int)
         
-        return self.train_and_evaluate_svm(train_vectors, y_train, test_vectors, y_test, 'bow')
+        return self.train_and_evaluate_svm(train_vectors, y_train, test_vectors, y_test, tag=f'{self.prefix}_bow')
 
     def run_sbert_pipeline(self):
         print("Running Sentence-BERT pipeline...")
@@ -151,7 +158,7 @@ class NLPPipeline:
             y_train = train_data['Quality']
             y_test = test_data['Quality']
             
-            results_df = self.train_and_evaluate_svm(X_train, y_train, X_test, y_test, f'sbert_{method}')
+            results_df = self.train_and_evaluate_svm(X_train, y_train, X_test, y_test, tag=f'{self.prefix}_sbert_{method}')
             results.extend(results_df.to_dict('records'))
         
         return pd.DataFrame(results)
@@ -162,7 +169,7 @@ class NLPPipeline:
         sbert_results = self.run_sbert_pipeline()
         
         combined_results = pd.concat([bow_results, sbert_results])
-        combined_results.to_csv(os.path.join(self.results_dir, 'combined_evaluation_results.csv'), index=False)
+        combined_results.to_csv(os.path.join(self.results_dir, f'{self.prefix}_evaluation_results.csv'), index=False)
         
         print("Results:")
         for _, row in combined_results.iterrows():
