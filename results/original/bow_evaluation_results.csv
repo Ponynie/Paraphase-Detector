@@ -1,5 +1,0 @@
-Method,Kernel,Accuracy
-bag-of-words,rbf,0.6915942028985507
-bag-of-words,linear,0.6405797101449275
-bag-of-words,poly,0.6828985507246377
-bag-of-words,sigmoid,0.5826086956521739

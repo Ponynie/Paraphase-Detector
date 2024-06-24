@@ -7,8 +7,8 @@ import joblib
 import os
 
 # Data directory
-train_dir = 'JAIST-intern-data/MRPC_test.txt'
-test_dir = 'JAIST-intern-data/MRPC_train.txt'
+train_dir = 'JAIST-intern-data/MRPC_test.txt' #! Major Error: This should be the training data, not the test data
+test_dir = 'JAIST-intern-data/MRPC_train.txt' #! Major Error: This should be the test data
 
 # Create the results directory
 results_dir = 'results/train_test_results_sbert'
