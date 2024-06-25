@@ -3,20 +3,22 @@ The data/ directory should be structured as follows:
 data/
 ├── MRPC_data/
 │   ├── original/
-│   │   ├── O_MRPC_test.txt
 │   │   └── O_MRPC_train.txt
 │   ├── augmented_1/
-│   │   ├── A1_MRPC_test.txt
 │   │   └── A1_MRPC_train.txt
-│   └── ...
-└── testrun_data/
+│   │── ...
+│   │
+│   └── test_data/
+│       └── MRPC_test.txt
+└── Sample_data/
     ├── original/
-    │   ├── O_testrun_test.txt
-    │   └── O_testrun_train.txt
+    │   └── O_Sample_train.txt
     ├── augmented_1/
-    │   ├── A1_testrun_test.txt
-    │   └── A1_testrun_train.txt
-    └── ...
+    │   └── A1_Sample_train.txt
+    ├── ...
+    │   
+    └── test_data/
+        └── Sample_test.txt
 
 The results/ directory should be structured as follows:
 
@@ -27,7 +29,7 @@ results/
 │   ├── augmented_1/
 │   │
 │   └── ...
-└── testrun_data/
+└── Sample_data/
     ├── original/
     │
     ├── augmented_1/

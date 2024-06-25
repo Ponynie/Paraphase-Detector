@@ -1,4 +1,4 @@
-# main.py is the entry point of the pipeline. It takes in the mode as an argument and runs the pipeline on the testrun data or the MRPC data accordingly.
+# main.py
 import argparse
 from pipeline import NLPPipeline
 import os
@@ -11,7 +11,7 @@ def process_dataset(dataset_type, base_data_dir, base_results_dir, augmented_dat
         
         #! Be careful with the file path
         train_dir = os.path.join(base_data_dir, dataset_type, dataset, f'{prefix}_{dataset_type.split("_")[0]}_train.txt') #! TRAIN
-        test_dir = os.path.join(base_data_dir, dataset_type, dataset, f'{prefix}_{dataset_type.split("_")[0]}_test.txt') #! TEST
+        test_dir = os.path.join(base_data_dir, dataset_type, 'test_data', f'{dataset_type.split("_")[0]}_test.txt') #! TEST
         results_dir = os.path.join(base_results_dir, dataset_type, dataset)
         
         pipeline = NLPPipeline(train_dir, test_dir, results_dir, prefix=prefix, save_models=False)
@@ -20,10 +20,10 @@ def process_dataset(dataset_type, base_data_dir, base_results_dir, augmented_dat
         print(f"Completed processing for {dataset_type} - {dataset}\n")
 
 def main():
-    #* Type python src/main.py --mode test or python src/main.py --mode full to run the pipeline
-    parser = argparse.ArgumentParser(description="Run NLP pipeline on test or real data.")
-    parser.add_argument('--mode', choices=['test', 'full'], required=True,
-                        help="'test' to run on testrun data, 'full' to run on MRPC data")
+    #* Type python src/main.py --mode sample or python src/main.py --mode full to run the pipeline
+    parser = argparse.ArgumentParser(description="Run NLP pipeline on sample or full data.")
+    parser.add_argument('--mode', choices=['sample', 'full'], required=True,
+                        help="'sample' to run on Sample data, 'full' to run on MRPC data")
     args = parser.parse_args()
 
     base_data_dir = 'data'
@@ -39,10 +39,10 @@ def main():
         ('full_augmented', 'FA') # All augmentations
     ]
 
-    if args.mode == 'test':
-        print("Running in test mode with testrun data...")
-        process_dataset('testrun_data', base_data_dir, base_results_dir, augmented_datasets)
-        print("Test run completed successfully. The pipeline is working as expected.")
+    if args.mode == 'sample':
+        print("Running in sample mode with Sample data...")
+        process_dataset('Sample_data', base_data_dir, base_results_dir, augmented_datasets)
+        print("Sample mode completed successfully. The pipeline is working as expected.")
         print("You can now run the pipeline with real data using the 'full' mode.")
     elif args.mode == 'full':
         print("Running in full mode with MRPC data...")
