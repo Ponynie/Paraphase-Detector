@@ -1,3 +1,4 @@
+# pipeline.py is the main module that contains the NLP pipeline. It has two classes: NLPStaticComponents and NLPPipeline. NLPStaticComponents contains the static components of the pipeline, such as the stop words, Porter Stemmer, Sentence Transformer model, and SVM kernels. NLPPipeline is the main class that processes the data, preprocesses it, and runs the Bag-of-Words and Sentence-BERT pipelines. The execute method runs both pipelines and saves the results to a CSV file. The main.py script is the entry point of the pipeline, which takes the mode as an argument and runs the pipeline on the testrun data or the MRPC data accordingly.
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer

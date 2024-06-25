@@ -1,3 +1,4 @@
+# main.py is the entry point of the pipeline. It takes in the mode as an argument and runs the pipeline on the testrun data or the MRPC data accordingly.
 import argparse
 from pipeline import NLPPipeline
 import os
@@ -19,6 +20,7 @@ def process_dataset(dataset_type, base_data_dir, base_results_dir, augmented_dat
         print(f"Completed processing for {dataset_type} - {dataset}\n")
 
 def main():
+    #* Type python src/main.py --mode test or python src/main.py --mode full to run the pipeline
     parser = argparse.ArgumentParser(description="Run NLP pipeline on test or real data.")
     parser.add_argument('--mode', choices=['test', 'full'], required=True,
                         help="'test' to run on testrun data, 'full' to run on MRPC data")
