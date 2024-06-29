@@ -6,16 +6,23 @@ from nltk.tokenize import word_tokenize
 from BackTranslation import BackTranslation
 import spacy
 
+def ensure_relative_path(path):
+    current_dir = os.path.dirname(__file__)
+    return os.path.join(current_dir, '..', path)
+
 # Download required NLTK data
 nltk.download('punkt')
 nltk.download('wordnet')
 
 # Load spaCy model
-nlp = spacy.load('en_core_web_sm')
+spc = spacy.load('en_core_web_sm')
+
+# Initialize backtranslation
+bt = BackTranslation()
 
 # Load PPDB
 ppdb = {}
-with open('PPDB-2.0-lexical.txt', 'r') as f:
+with open(ensure_relative_path('src/PPDB-2.0-lexical.txt'), 'r') as f:
     for line in f:
         word1, word2, _ = line.strip().split('\t')
         if word1 not in ppdb:
@@ -49,7 +56,6 @@ def word_paraphrase(sentence, p=0.25):
     return ' '.join(new_words)
 
 def backtranslation(sentence):
-    bt = BackTranslation()
     result = bt.translate(sentence, src='en', tmp='de', sleeping=1)
     return result.result_text
 
@@ -63,7 +69,7 @@ def random_word_deletion(sentence, p=0.25):
     return ' '.join(new_words)
 
 def subject_object_switch(sentence):
-    doc = nlp(sentence)
+    doc = spc(sentence)
     subject = None
     object = None
     verb = None
@@ -180,10 +186,6 @@ def process_dataset(dataset_type, base_data_dir):
                 outfile.write(infile.read())
     
     print(f"Completed processing for {dataset_type}\n")
-
-def ensure_relative_path(self, path):
-    current_dir = os.path.dirname(__file__)
-    return os.path.join(current_dir, '..', path)
 
 def main():
     base_data_dir = 'data'
