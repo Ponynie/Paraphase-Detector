@@ -29,7 +29,7 @@ def synonym_substitution(sentence, p=0.25):
         if random.random() < p:
             synsets = wordnet.synsets(word)
             if synsets:
-                synonym = random.choice(synsets).lemmas()[0].name()
+                synonym = random.choice(synsets).lemmas()[0].name() #? what?
                 new_words.append(synonym)
             else:
                 new_words.append(word)
@@ -49,8 +49,8 @@ def word_paraphrase(sentence, p=0.25):
     return ' '.join(new_words)
 
 def backtranslation(sentence):
-    bt = BackTranslation(tmp='de', sleep_sec=1)
-    result = bt.translate(sentence, src='en', tmp='de')
+    bt = BackTranslation()
+    result = bt.translate(sentence, src='en', tmp='de', sleeping=1)
     return result.result_text
 
 def random_word_deletion(sentence, p=0.25):
@@ -67,15 +67,14 @@ def subject_object_switch(sentence):
     subject = None
     object = None
     verb = None
-    
+
     for token in doc:
-        if token.dep_ == "nsubj":
+        if token.dep_ == "nsubj" and token.head.pos_ == "VERB":
             subject = token
-        elif token.dep_ == "dobj":
+            verb = token.head
+        elif token.dep_ == "dobj" and token.head == verb:
             object = token
-        if token.pos_ == "VERB":
-            verb = token
-    
+
     if subject and object and verb:
         words = [token.text for token in doc]
         subject_index = subject.i
@@ -83,7 +82,7 @@ def subject_object_switch(sentence):
         words[subject_index], words[object_index] = words[object_index], words[subject_index]
         return ' '.join(words)
     else:
-        return sentence
+        return sentence  
 
 def augment_data(input_file, output_file, augmentation_method):
     with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
@@ -105,7 +104,7 @@ def augment_data(input_file, output_file, augmentation_method):
                     s1_aug = word_paraphrase(s1)
                     s2_aug = word_paraphrase(s2)
                     id1 = f"{id1}_A2"; id2 = f"{id2}_A2"
-                elif augmentation_method == 'backtranslation':
+                elif augmentation_method == 'backtranslation': 
                     s1_aug = backtranslation(s1)
                     s2_aug = backtranslation(s2)
                     id1 = f"{id1}_A3"; id2 = f"{id2}_A3"
@@ -115,8 +114,12 @@ def augment_data(input_file, output_file, augmentation_method):
                     id1 = f"{id1}_A4"; id2 = f"{id2}_A4"
                     quality = '0' # Set quality to 0 for random word deletion
                 elif augmentation_method == 'subject_object_switch' and quality == '1':
-                    s1_aug = subject_object_switch(s1)
-                    s2_aug = subject_object_switch(s2)
+                    if random.random() < 0.5:
+                        s1_aug = subject_object_switch(s1)
+                        s2_aug = s2
+                    else:
+                        s2_aug = subject_object_switch(s2)
+                        s1_aug = s1
                     id1 = f"{id1}_A5"; id2 = f"{id2}_A5"
                     quality = '0'  # Set quality to 0 for subject-object switch
                 else:
@@ -124,6 +127,7 @@ def augment_data(input_file, output_file, augmentation_method):
                 
                 if s1_aug != s1 or s2_aug != s2:
                     outfile.write(f"{quality}\t{id1}\t{id2}\t{s1_aug}\t{s2_aug}\n")
+
                     
             else:
                 print(f"Skipping malformed line: {line}")
