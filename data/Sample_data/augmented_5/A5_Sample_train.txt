@@ -1,5 +1,6 @@
 Quality	#1 ID	#2 ID	#1 String	#2 String
 0	702876_A5	702977_A5	Amrozi accused his brother , whom he called " the witness " , of deliberately distorting his evidence .	Referring to him as only " the witness " , brother accused his Amrozi of deliberately distorting his evidence .
 0	1330381_A5	1330521_A5	They had published an advertisement on the Internet on June 10 , offering the cargo for sale , he added .	On June 10 , the ship 's advertisement had published an owners on the Internet , offering the explosives for sale .
+0	579975_A5	579810_A5	The DVD-CCA then appealed to the state Supreme Court .	The DVD decision appealed that CCA to the U.S. Supreme Court .
 0	1355540_A5	1355592_A5	He said the foodservice pie business doesn ' strategy fit the company 's long - term growth t .	" The foodservice pie business does not fit our long-term growth strategy .
 0	771416_A5	771467_A5	He told The Sun newspaper that Mr. Hussein 's daughters had British they and hospitals in mind when schools decided to ask for asylum .	" Saddam 's daughters had British schools and hospitals in mind when they decided to ask for asylum -- especially the schools , " he told The Sun .

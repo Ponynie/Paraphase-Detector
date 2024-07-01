@@ -27,6 +27,9 @@ class NLPPipeline:
     original_sbert_cache = pd.DataFrame()
     original_bow_cache = pd.DataFrame() 
     
+    testset_sbert_cache = pd.DataFrame()
+    testset_bow_cache = pd.DataFrame()
+    
     def __init__(self, train_path, test_path, results_dir, prefix, save_models=False):
         self.train_path = self.ensure_relative_path(train_path)
         self.test_path = self.ensure_relative_path(test_path)
@@ -144,12 +147,27 @@ class NLPPipeline:
                 return train_data
         else:
             raise ValueError("Invalid pipeline type")
-            
+        
+    def testset_data_cache(self, pipeline_type):
+        if pipeline_type == 'bow':
+            if not NLPPipeline.testset_bow_cache.empty:
+                return NLPPipeline.testset_bow_cache.copy()
+            else:
+                NLPPipeline.testset_bow_cache = self.preprocess_data(self.test_path, method='bow')
+                return NLPPipeline.testset_bow_cache.copy()
+        elif pipeline_type == 'sbert':
+            if not NLPPipeline.testset_sbert_cache.empty:
+                return NLPPipeline.testset_sbert_cache.copy()
+            else:
+                NLPPipeline.testset_sbert_cache = self.preprocess_data(self.test_path, method='sbert')
+                return NLPPipeline.testset_sbert_cache.copy()
+
     
     def run_bow_pipeline(self):
         print("Running Bag-of-Words pipeline...")
         train_data = self.preprocess_data(self.train_path, method='bow')
-        test_data = self.preprocess_data(self.test_path, method='bow')
+        test_data = self.testset_data_cache(pipeline_type='bow')
+        #test_data = self.preprocess_data(self.test_path, method='bow')
         
         train_data = self.original_data_cache(train_data, pipeline_type='bow')
         
@@ -168,7 +186,8 @@ class NLPPipeline:
     def run_sbert_pipeline(self):
         print("Running Sentence-BERT pipeline...")
         train_data = self.preprocess_data(self.train_path, method='sbert')
-        test_data = self.preprocess_data(self.test_path, method='sbert')
+        test_data = self.testset_data_cache(pipeline_type='sbert')
+        #test_data = self.preprocess_data(self.test_path, method='sbert')
         
         train_data = self.original_data_cache(train_data, pipeline_type='sbert')
         

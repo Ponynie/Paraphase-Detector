@@ -2,6 +2,7 @@
 import argparse
 from pipeline import NLPPipeline
 import os
+import pandas as pd
 
 def process_dataset(dataset_type, base_data_dir, base_results_dir, augmented_datasets):
     print(f"Processing {dataset_type}")
@@ -18,6 +19,14 @@ def process_dataset(dataset_type, base_data_dir, base_results_dir, augmented_dat
         pipeline.execute() 
         
         print(f"Completed processing for {dataset_type} - {dataset}\n")
+    
+    # Reset the cache
+    NLPPipeline.original_bow_cache = pd.DataFrame() 
+    NLPPipeline.original_sbert_cache = pd.DataFrame()
+    NLPPipeline.testset_bow_cache = pd.DataFrame()
+    NLPPipeline.testset_sbert_cache = pd.DataFrame()
+    print(f"Completed processing for {dataset_type}")
+    
 
 def main():
     #* Type python src/main.py --mode sample or python src/main.py --mode full to run the pipeline

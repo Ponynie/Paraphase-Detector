@@ -163,20 +163,20 @@ def augment_data(input_file, output_file, augmentation_method):
 def process_dataset(dataset_type, base_data_dir):
     original_train = os.path.join(base_data_dir, dataset_type, 'original', f'O_{dataset_type.split("_")[0]}_train.txt')
 
-    # augmentation_methods = [
-    #     ('augmented_1', 'A1', 'synonym_substitution'),
-    #     ('augmented_2', 'A2', 'word_paraphrase'),
-    #     ('augmented_3', 'A3', 'backtranslation'),
-    #     ('augmented_4', 'A4', 'random_word_deletion'),
-    #     ('augmented_5', 'A5', 'subject_object_switch')
-    # ]
-    
     augmentation_methods = [
         ('augmented_1', 'A1', 'synonym_substitution'),
         ('augmented_2', 'A2', 'word_paraphrase'),
+        ('augmented_3', 'A3', 'backtranslation'),
         ('augmented_4', 'A4', 'random_word_deletion'),
         ('augmented_5', 'A5', 'subject_object_switch')
     ]
+    
+    # augmentation_methods = [
+    #     ('augmented_1', 'A1', 'synonym_substitution'),
+    #     ('augmented_2', 'A2', 'word_paraphrase'),
+    #     ('augmented_4', 'A4', 'random_word_deletion'),
+    #     ('augmented_5', 'A5', 'subject_object_switch')
+    # ]
 
     for folder, prefix, method in augmentation_methods:
         print(f"Processing {method} for {dataset_type}")
@@ -211,7 +211,7 @@ def main():
     base_data_dir = 'data'
     base_data_dir = ensure_relative_path(base_data_dir)
     
-    # process_dataset('Sample_data', base_data_dir)
+    #process_dataset('Sample_data', base_data_dir)
     process_dataset('MRPC_data', base_data_dir)
 
 if __name__ == "__main__":
