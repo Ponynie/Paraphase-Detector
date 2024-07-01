@@ -23,6 +23,10 @@ class NLPStaticComponents:
     kernels = ['rbf', 'linear', 'poly', 'sigmoid']
     
 class NLPPipeline:
+    
+    original_sbert_cache = pd.DataFrame()
+    original_bow_cache = pd.DataFrame() 
+    
     def __init__(self, train_path, test_path, results_dir, prefix, save_models=False):
         self.train_path = self.ensure_relative_path(train_path)
         self.test_path = self.ensure_relative_path(test_path)
@@ -63,8 +67,8 @@ class NLPPipeline:
                         clean_data['#1 String'].append(self.preprocess_sentence(parts[3]))
                         clean_data['#2 String'].append(self.preprocess_sentence(parts[4]))
                     else:
-                        clean_data['#1 String'].append(parts[3])
-                        clean_data['#2 String'].append(parts[4])
+                        clean_data['#1 String'].append(self.get_sentence_vector(parts[3]))
+                        clean_data['#2 String'].append(self.get_sentence_vector(parts[4]))
                 else:
                     print(f"Skipping malformed line: {line}")
         return pd.DataFrame(clean_data)
@@ -72,9 +76,7 @@ class NLPPipeline:
     def get_sentence_vector(self, sentence):
         return self.sbert_model.encode([sentence])[0]
 
-    def create_combined_vector(self, s1, s2, method='concatenation'):
-        vec1 = self.get_sentence_vector(s1)
-        vec2 = self.get_sentence_vector(s2)
+    def create_combined_vector(self, vec1, vec2, method='concatenation'):
         
         if method == 'concatenation':
             return np.concatenate((vec1, vec2))
@@ -127,10 +129,29 @@ class NLPPipeline:
         
         return results_df
 
+    def original_data_cache(self, train_data: pd.DataFrame , pipeline_type):
+        if pipeline_type == 'bow':
+            if not NLPPipeline.original_bow_cache.empty:
+                return pd.concat([NLPPipeline.original_bow_cache, train_data])
+            else:
+                NLPPipeline.original_bow_cache = train_data.copy()
+                return train_data
+        elif pipeline_type == 'sbert':
+            if not NLPPipeline.original_sbert_cache.empty:
+                return pd.concat([NLPPipeline.original_sbert_cache, train_data])
+            else:
+                NLPPipeline.original_sbert_cache = train_data.copy()
+                return train_data
+        else:
+            raise ValueError("Invalid pipeline type")
+            
+    
     def run_bow_pipeline(self):
         print("Running Bag-of-Words pipeline...")
         train_data = self.preprocess_data(self.train_path, method='bow')
         test_data = self.preprocess_data(self.test_path, method='bow')
+        
+        train_data = self.original_data_cache(train_data, pipeline_type='bow')
         
         train_data['Features'] = train_data.apply(self.make_feature_list, axis=1)
         test_data['Features'] = test_data.apply(self.make_feature_list, axis=1)
@@ -149,8 +170,11 @@ class NLPPipeline:
         train_data = self.preprocess_data(self.train_path, method='sbert')
         test_data = self.preprocess_data(self.test_path, method='sbert')
         
+        train_data = self.original_data_cache(train_data, pipeline_type='sbert')
+        
         methods = ['concatenation', 'mean', 'max_pooling']
         results = []
+        
         
         for method in methods:
             print(f"Processing SBERT with {method} method...")

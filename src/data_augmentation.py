@@ -5,10 +5,14 @@ from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize
 from BackTranslation import BackTranslation
 import spacy
+from tqdm import tqdm
+from time import sleep
 
 def ensure_relative_path(path):
     current_dir = os.path.dirname(__file__)
     return os.path.join(current_dir, '..', path)
+
+random.seed(42)
 
 # Download required NLTK data
 nltk.download('punkt')
@@ -23,7 +27,7 @@ bt = BackTranslation()
 # Load PPDB
 ppdb = {}
 with open(ensure_relative_path('src/PPDB-2.0-lexical.txt'), 'r') as f:
-    for line in f:
+    for line in tqdm(f, desc="Loading PPDB"):
         word1, word2, _ = line.strip().split('\t')
         if word1 not in ppdb:
             ppdb[word1] = []
@@ -58,6 +62,17 @@ def word_paraphrase(sentence, p=0.25):
 def backtranslation(sentence):
     result = bt.translate(sentence, src='en', tmp='de', sleeping=1)
     return result.result_text
+
+def backtranslation(sentence, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            result = bt.translate(sentence, src='en', tmp='de', sleeping=1)
+            return result.result_text
+        except Exception as e:
+            print(f"Backtranslation failed (attempt {attempt + 1}/{max_retries}): {str(e)}")
+            sleep(2 ** attempt)  # Exponential backoff
+    print(f"Backtranslation failed after {max_retries} attempts")
+    return sentence  # Return original sentence if all attempts fail
 
 def random_word_deletion(sentence, p=0.25):
     words = word_tokenize(sentence)
@@ -96,7 +111,8 @@ def augment_data(input_file, output_file, augmentation_method):
         header = infile.readline()
         outfile.write(header)
         
-        for line in infile:
+        lines = infile.readlines()
+        for line in tqdm(lines, desc=f"Augmenting with {augmentation_method}"):
             parts = line.strip().split('\t')
             if len(parts) == 5:
                 quality, id1, id2, s1, s2 = parts
@@ -133,8 +149,6 @@ def augment_data(input_file, output_file, augmentation_method):
                 
                 if s1_aug != s1 or s2_aug != s2:
                     outfile.write(f"{quality}\t{id1}\t{id2}\t{s1_aug}\t{s2_aug}\n")
-
-                    
             else:
                 print(f"Skipping malformed line: {line}")
 
@@ -151,18 +165,18 @@ def process_dataset(dataset_type, base_data_dir):
 
     for folder, prefix, method in augmentation_methods:
         print(f"Processing {method} for {dataset_type}")
+        
         output_folder = os.path.join(base_data_dir, dataset_type, folder)
         os.makedirs(output_folder, exist_ok=True)
-
         augmented_train = os.path.join(output_folder, f'{prefix}_{dataset_type.split("_")[0]}_train.txt')
 
         augment_data(original_train, augmented_train, method)
 
     # Create full augmented dataset
     print(f"Creating full augmented dataset for {dataset_type}")
+    
     full_augmented_folder = os.path.join(base_data_dir, dataset_type, 'full_augmented')
     os.makedirs(full_augmented_folder, exist_ok=True)
-
     full_augmented_train = os.path.join(full_augmented_folder, f'FA_{dataset_type.split("_")[0]}_train.txt')
 
     with open(full_augmented_train, 'w') as outfile:
@@ -170,18 +184,9 @@ def process_dataset(dataset_type, base_data_dir):
         with open(original_train, 'r') as infile:
             outfile.write(infile.readline())
         
-        # Write original and all augmented data
-        for folder, prefix, _ in [('original', 'O', None)] + augmentation_methods:
+        # Write all augmented data
+        for folder, prefix, _ in tqdm(augmentation_methods, desc="Combining augmented datasets"):
             with open(os.path.join(base_data_dir, dataset_type, folder, f'{prefix}_{dataset_type.split("_")[0]}_train.txt'), 'r') as infile:
-                next(infile)  # Skip header
-                outfile.write(infile.read())
-    
-    # Append original data to each of the augmented datasets (except for full augmented which already contains original data)
-    print(f"Appending original data to augmented datasets for {dataset_type}")
-    for folder, prefix, _ in augmentation_methods:
-        augmented_train = os.path.join(base_data_dir, dataset_type, folder, f'{prefix}_{dataset_type.split("_")[0]}_train.txt')
-        with open(augmented_train, 'a') as outfile:
-            with open(original_train, 'r') as infile:
                 next(infile)  # Skip header
                 outfile.write(infile.read())
     
