@@ -30,7 +30,7 @@ def main():
     base_results_dir = 'results'
 
     augmented_datasets = [
-        ('original', 'O'),
+        ('original', 'O'), #! Do not remove this (Original data needed to cache the augmented data)
         ('augmented_1', 'A1'), # Synonym Substitution
         ('augmented_2', 'A2'), # Word Paraphrase
         ('augmented_3', 'A3'), # BackTranslation

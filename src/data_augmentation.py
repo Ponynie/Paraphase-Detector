@@ -138,10 +138,18 @@ def augment_data(input_file, output_file, augmentation_method):
                 elif augmentation_method == 'subject_object_switch' and quality == '1':
                     if random.random() < 0.5:
                         s1_aug = subject_object_switch(s1)
-                        s2_aug = s2
+                        if s1_aug == s1:
+                            s2_aug = subject_object_switch(s2)
+                            s1_aug = s1
+                        else:
+                            s2_aug = s2
                     else:
                         s2_aug = subject_object_switch(s2)
-                        s1_aug = s1
+                        if s2_aug == s2:
+                            s1_aug = subject_object_switch(s1)
+                            s2_aug = s2
+                        else:
+                            s1_aug = s1
                     id1 = f"{id1}_A5"; id2 = f"{id2}_A5"
                     quality = '0'  # Set quality to 0 for subject-object switch
                 else:
@@ -155,10 +163,17 @@ def augment_data(input_file, output_file, augmentation_method):
 def process_dataset(dataset_type, base_data_dir):
     original_train = os.path.join(base_data_dir, dataset_type, 'original', f'O_{dataset_type.split("_")[0]}_train.txt')
 
+    # augmentation_methods = [
+    #     ('augmented_1', 'A1', 'synonym_substitution'),
+    #     ('augmented_2', 'A2', 'word_paraphrase'),
+    #     ('augmented_3', 'A3', 'backtranslation'),
+    #     ('augmented_4', 'A4', 'random_word_deletion'),
+    #     ('augmented_5', 'A5', 'subject_object_switch')
+    # ]
+    
     augmentation_methods = [
         ('augmented_1', 'A1', 'synonym_substitution'),
         ('augmented_2', 'A2', 'word_paraphrase'),
-        ('augmented_3', 'A3', 'backtranslation'),
         ('augmented_4', 'A4', 'random_word_deletion'),
         ('augmented_5', 'A5', 'subject_object_switch')
     ]
@@ -196,8 +211,8 @@ def main():
     base_data_dir = 'data'
     base_data_dir = ensure_relative_path(base_data_dir)
     
-    process_dataset('Sample_data', base_data_dir)
-    # process_dataset('MRPC_data', base_data_dir)
+    # process_dataset('Sample_data', base_data_dir)
+    process_dataset('MRPC_data', base_data_dir)
 
 if __name__ == "__main__":
     main()
