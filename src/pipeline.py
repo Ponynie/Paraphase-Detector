@@ -1,3 +1,4 @@
+import re
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
@@ -133,18 +134,30 @@ class NLPPipeline:
         return results_df
 
     def original_data_cache(self, train_data: pd.DataFrame , pipeline_type):
+
+        def original_train_path():
+            path = re.sub(r'/(full_augmented|augmented_\d+)', '/original', self.train_path)
+            path = re.sub(r'/(FA_|A\d+_)', '/O_', path)
+            return path
+        
         if pipeline_type == 'bow':
             if not NLPPipeline.original_bow_cache.empty:
                 return pd.concat([NLPPipeline.original_bow_cache, train_data])
-            else:
+            elif self.prefix == 'O':
                 NLPPipeline.original_bow_cache = train_data.copy()
                 return train_data
+            else:
+                original_train_data = self.preprocess_data(original_train_path(), method='bow')
+                return pd.concat([original_train_data, train_data])
         elif pipeline_type == 'sbert':
             if not NLPPipeline.original_sbert_cache.empty:
                 return pd.concat([NLPPipeline.original_sbert_cache, train_data])
-            else:
+            elif self.prefix == 'O':
                 NLPPipeline.original_sbert_cache = train_data.copy()
                 return train_data
+            else:
+                original_train_data = self.preprocess_data(original_train_path(), method='sbert')
+                return pd.concat([original_train_data, train_data])
         else:
             raise ValueError("Invalid pipeline type")
         
@@ -204,8 +217,22 @@ class NLPPipeline:
         return pd.DataFrame(results)
 
     def execute(self):
-        bow_results = self.run_bow_pipeline()
         sbert_results = self.run_sbert_pipeline()
+        bow_results = self.run_bow_pipeline()
+
+        combined_results = pd.concat([bow_results, sbert_results])
+        combined_results.to_csv(os.path.join(self.results_dir, f'{self.prefix}_evaluation_results.csv'), index=False)
+        
+        print("Results:")
+        for _, row in combined_results.iterrows():
+            print(f"Method: {row['Method']}, Kernel: {row['Kernel']}, Accuracy: {row['Accuracy']}")
+            
+    def lite_execute(self, kernels=['rbf']):
+        sbert_results = self.run_sbert_pipeline()
+        
+        print(f"Bag-of-World Running Lite execution with kernels: {kernels}...")
+        self.kernels = kernels
+        bow_results = self.run_bow_pipeline()
         
         combined_results = pd.concat([bow_results, sbert_results])
         combined_results.to_csv(os.path.join(self.results_dir, f'{self.prefix}_evaluation_results.csv'), index=False)
@@ -213,3 +240,5 @@ class NLPPipeline:
         print("Results:")
         for _, row in combined_results.iterrows():
             print(f"Method: {row['Method']}, Kernel: {row['Kernel']}, Accuracy: {row['Accuracy']}")
+        
+        print("Lite execution completed successfully.")
