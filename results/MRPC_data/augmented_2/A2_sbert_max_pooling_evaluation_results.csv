@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+A2_sbert_max_pooling,rbf,0.7576811594202899
+A2_sbert_max_pooling,linear,0.7176811594202899
+A2_sbert_max_pooling,poly,0.7495652173913043
+A2_sbert_max_pooling,sigmoid,0.6794202898550724

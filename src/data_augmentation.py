@@ -59,10 +59,6 @@ def word_paraphrase(sentence, p=0.25):
             new_words.append(word)
     return ' '.join(new_words)
 
-def backtranslation(sentence):
-    result = bt.translate(sentence, src='en', tmp='de', sleeping=1)
-    return result.result_text
-
 def backtranslation(sentence, max_retries=3):
     for attempt in range(max_retries):
         try:

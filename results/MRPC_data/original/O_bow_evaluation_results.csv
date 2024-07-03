@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+O_bow,rbf,0.6915942028985507
+O_bow,linear,0.6405797101449275
+O_bow,poly,0.6828985507246377
+O_bow,sigmoid,0.5826086956521739

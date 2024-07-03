@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+A3_bow,rbf,0.6939130434782609
+A3_bow,linear,0.6359420289855072
+A3_bow,poly,0.6817391304347826
+A3_bow,sigmoid,0.5698550724637681

@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+O_sbert_mean,rbf,0.7217391304347827
+O_sbert_mean,linear,0.6469565217391304
+O_sbert_mean,poly,0.6915942028985507
+O_sbert_mean,sigmoid,0.6081159420289856

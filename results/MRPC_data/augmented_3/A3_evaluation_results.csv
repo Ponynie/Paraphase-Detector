@@ -1,0 +1,17 @@
+Method,Kernel,Accuracy
+A3_bow,rbf,0.6939130434782609
+A3_bow,linear,0.6359420289855072
+A3_bow,poly,0.6817391304347826
+A3_bow,sigmoid,0.5698550724637681
+A3_sbert_concatenation,rbf,0.696231884057971
+A3_sbert_concatenation,linear,0.6324637681159421
+A3_sbert_concatenation,poly,0.7118840579710145
+A3_sbert_concatenation,sigmoid,0.5657971014492753
+A3_sbert_mean,rbf,0.7257971014492753
+A3_sbert_mean,linear,0.6336231884057971
+A3_sbert_mean,poly,0.6968115942028985
+A3_sbert_mean,sigmoid,0.5634782608695652
+A3_sbert_max_pooling,rbf,0.7530434782608696
+A3_sbert_max_pooling,linear,0.7176811594202899
+A3_sbert_max_pooling,poly,0.7518840579710145
+A3_sbert_max_pooling,sigmoid,0.6585507246376812

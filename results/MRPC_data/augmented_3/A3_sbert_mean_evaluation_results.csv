@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+A3_sbert_mean,rbf,0.7257971014492753
+A3_sbert_mean,linear,0.6336231884057971
+A3_sbert_mean,poly,0.6968115942028985
+A3_sbert_mean,sigmoid,0.5634782608695652

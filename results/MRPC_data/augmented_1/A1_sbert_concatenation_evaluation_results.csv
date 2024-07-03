@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+A1_sbert_concatenation,rbf,0.6997101449275362
+A1_sbert_concatenation,linear,0.6266666666666667
+A1_sbert_concatenation,poly,0.7043478260869566
+A1_sbert_concatenation,sigmoid,0.5907246376811595

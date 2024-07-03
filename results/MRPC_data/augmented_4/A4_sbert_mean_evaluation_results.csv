@@ -1,0 +1,5 @@
+Method,Kernel,Accuracy
+A4_sbert_mean,rbf,0.6759420289855073
+A4_sbert_mean,linear,0.616231884057971
+A4_sbert_mean,poly,0.6197101449275362
+A4_sbert_mean,sigmoid,0.5455072463768116
