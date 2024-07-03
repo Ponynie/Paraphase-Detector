@@ -22,6 +22,7 @@ class NLPStaticComponents:
     ps = PorterStemmer()
     sbert_model = SentenceTransformer('distilbert-base-nli-mean-tokens')
     kernels = ['rbf', 'linear', 'poly', 'sigmoid']
+    sbert_methods = ['concatenation', 'mean', 'max_pooling']
     
 class NLPPipeline:
     
@@ -39,6 +40,7 @@ class NLPPipeline:
         self.ps = NLPStaticComponents.ps
         self.sbert_model = NLPStaticComponents.sbert_model
         self.kernels = NLPStaticComponents.kernels
+        self.sbert_methods = NLPStaticComponents.sbert_methods
         self.save_models = save_models
         self.prefix = prefix
 
@@ -227,11 +229,13 @@ class NLPPipeline:
         for _, row in combined_results.iterrows():
             print(f"Method: {row['Method']}, Kernel: {row['Kernel']}, Accuracy: {row['Accuracy']}")
             
-    def lite_execute(self, kernels=['rbf']):
-        sbert_results = self.run_sbert_pipeline()
+    def lite_execute(self, kernels=['rbf'], sbert_methods=['max_pooling']):
+        print(f"Running Lite execution with kernels: {kernels} and SBERT methods: {self.sbert_methods}")
         
-        print(f"Bag-of-World Running Lite execution with kernels: {kernels}...")
         self.kernels = kernels
+        self.sbert_methods = sbert_methods
+        
+        sbert_results = self.run_sbert_pipeline()
         bow_results = self.run_bow_pipeline()
         
         combined_results = pd.concat([bow_results, sbert_results])

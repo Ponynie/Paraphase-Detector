@@ -22,4 +22,4 @@ def FA_Sample():
     pipeline = NLPPipeline(train_dir, test_dir, results_dir, prefix='FA', save_models=False)
     pipeline.lite_execute()
     
-FA_Sample()
+FA_MRPC()
