@@ -203,7 +203,7 @@ class NLPPipeline:
         
         train_data = self.original_data_cache(train_data, pipeline_type='sbert')
         
-        methods = ['concatenation', 'mean', 'max_pooling']
+        methods = self.sbert_methods
         results = []
         
         for method in methods:
@@ -230,7 +230,7 @@ class NLPPipeline:
             print(f"Method: {row['Method']}, Kernel: {row['Kernel']}, Accuracy: {row['Accuracy']}")
             
     def lite_execute(self, kernels=['rbf'], sbert_methods=['max_pooling']):
-        print(f"Running Lite execution with kernels: {kernels} and SBERT methods: {self.sbert_methods}")
+        print(f"Running Lite execution with kernels: {kernels} and SBERT methods: {sbert_methods}")
         
         self.kernels = kernels
         self.sbert_methods = sbert_methods
