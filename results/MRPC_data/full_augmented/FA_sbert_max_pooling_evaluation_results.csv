@@ -1,0 +1,2 @@
+Method,Kernel,Accuracy
+FA_sbert_max_pooling,rbf,0.7368115942028985
