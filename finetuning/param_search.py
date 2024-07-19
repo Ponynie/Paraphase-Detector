@@ -2,8 +2,8 @@ import os
 import pandas as pd
 from itertools import product
 from tqdm import tqdm
-from abstract import SbertDataModule
-from abstract import SVMModel
+from finetuning.module import SbertDataModule
+from finetuning.module import SVMModel
 
 # Paths to data files
 TRAIN_DIR = 'finetuning/MRPC_train.txt'
@@ -18,7 +18,7 @@ GAMMA_VALUES = ['scale']
 #GAMMA_VALUES = ['scale', 'auto', 0.1, 1]
 
 # Results file
-RESULTS_FILE = 'hyperparameter_search_results.csv'
+RESULTS_FILE = 'finetuning/hyperparameter_search_results.csv'
 
 def load_existing_results():
     if os.path.exists(RESULTS_FILE):

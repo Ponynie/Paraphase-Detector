@@ -143,6 +143,7 @@ class SVMModel:
         self.kernel = kernel
 
     def train(self, data_df: pd.DataFrame, C=1.0, gamma='scale'):
+        print(f"{"-"*42}\nTraining SVM model with C={C}, gamma={gamma}\n{"-"*42}")
         X = np.stack(data_df['Features'].to_numpy())
         y = data_df['Quality'].to_numpy()
 
@@ -150,6 +151,7 @@ class SVMModel:
         self.model.fit(X, y)
 
     def test(self, data_df: pd.DataFrame):
+        print(f"{"-"*20}\nTesting SVM model...\n{"-"*20}")
         X = np.stack(data_df['Features'].to_numpy())
         y = data_df['Quality'].to_numpy()
 
