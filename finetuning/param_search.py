@@ -18,7 +18,7 @@ GAMMA_VALUES = ['scale']
 #GAMMA_VALUES = ['scale', 'auto', 0.1, 1]
 
 # Results file
-RESULTS_FILE = 'finetuning/hyperparameter_search_results.csv'
+RESULTS_FILE = 'finetuning/param_search_results.csv'
 
 def load_existing_results():
     if os.path.exists(RESULTS_FILE):
