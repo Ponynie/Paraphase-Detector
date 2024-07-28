@@ -1,0 +1,15 @@
+Description,Accuracy
+Reduced dataset (50%),0.7455072463768115
+"Augmented dataset (50%) both, include_bt=False",0.7292753623188406
+"Augmented dataset (50%) both, include_bt=True",0.7431884057971014
+"Augmented dataset (50%) paraphrase, include_bt=False",0.7315942028985507
+"Augmented dataset (50%) paraphrase, include_bt=True",0.7455072463768115
+"Augmented dataset (50%) synonym, include_bt=False",0.7414492753623189
+"Augmented dataset (50%) synonym, include_bt=True",0.7472463768115942
+Reduced dataset (25%),0.736231884057971
+"Augmented dataset (25%) both, include_bt=False",0.7263768115942029
+"Augmented dataset (25%) both, include_bt=True",0.7443478260869565
+"Augmented dataset (25%) paraphrase, include_bt=False",0.7205797101449275
+"Augmented dataset (25%) paraphrase, include_bt=True",0.7368115942028985
+"Augmented dataset (25%) synonym, include_bt=False",0.7257971014492753
+"Augmented dataset (25%) synonym, include_bt=True",0.7466666666666667

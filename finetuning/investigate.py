@@ -47,7 +47,6 @@ def reduce():
         with open(csv_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([f"Augmented dataset (25%) {augment_method}, include_bt={include_bt}", augmented_accuracy])
-            
     return data_module
 
 def neural(module=None):
@@ -62,21 +61,35 @@ def neural(module=None):
         )
     else:
         data_module = module
+
     # Get test data
     test_data = data_module.get_test_data()
 
-    # Test with full dataset
+    # Test with full augmented dataset
     print("Testing with full augmented dataset:")
     full_train_data = data_module.get_augmented_train_data(p=0.7, include_bt=True, augment_method='both')
-    
-    # FNN Model
+
+    # Get unaugmented train data
+    unaugmented_train_data = data_module.get_train_data()
+
+    # FNN Model parameters
     input_size = full_train_data['Features'].iloc[0].shape[0]
     hidden_size = 64
     output_size = len(full_train_data['Quality'].unique())
-    fnn_model, full_fnn_result = train_fnn_model(full_train_data, test_data, input_size, hidden_size, output_size)
-    print(f"Full augmented dataset FNN test result: {full_fnn_result}")
-    # Save the result to CSV
-    result_df = pd.DataFrame(full_fnn_result)
+
+    # Train and test with augmented data
+    fnn_model_augmented, full_fnn_result_augmented = train_fnn_model(full_train_data, test_data, input_size, hidden_size, output_size)
+    print(f"Full augmented dataset FNN test result: {full_fnn_result_augmented}")
+
+    # Train and test with unaugmented data
+    fnn_model_unaugmented, full_fnn_result_unaugmented = train_fnn_model(unaugmented_train_data, test_data, input_size, hidden_size, output_size)
+    print(f"Unaugmented dataset FNN test result: {full_fnn_result_unaugmented}")
+
+    # Save the results to CSV
+    result_df = pd.DataFrame({
+        'Augmented': full_fnn_result_augmented,
+        'Unaugmented': full_fnn_result_unaugmented
+    })
     result_df.to_csv('finetuning/nn_result.csv', index=False)
 
 def bert():
@@ -96,24 +109,32 @@ def bert():
     # Define the CSV file name
     csv_file = "finetuning/bert_results.csv"
 
-    # Write the header to the CSV file (if it doesn't exist)
-    with open(csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["Description", "Accuracy"])
+    # # Write the header to the CSV file (if it doesn't exist)
+    # with open(csv_file, mode='a', newline='') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(["Description", "Accuracy"])
 
-    # Test with reduced dataset 
-    print("\nTesting with full augmented dataset:")
-    full_train_data = data_module.get_augmented_train_data(p=0.7, include_bt=True, augment_method='both')
+    # Test with full unaugmented dataset 
+    print("\nTesting with full unaugmented dataset:")
+    full_train_data = data_module.get_train_data()
     accuracy = svm_model.train_and_test(full_train_data, test_data)
-    print(f"Full augmented dataset BERT accuracy: {accuracy}")
+    print(f"Full unaugmented dataset BERT accuracy: {accuracy}")
 
     # Write the result to the CSV file
     with open(csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Full augmented dataset BERT", accuracy])
+        writer.writerow(["Full unaugmented dataset BERT", accuracy])
     
+def find_bad_aug():
+    
+    # Initialize data module
+    data_module = SbertDataModule(
+        train_dir='finetuning/MRPC_train.txt',
+        test_dir='finetuning/MRPC_test.txt',
+        backTranslation_dir='finetuning/MRPC_bt.txt',
+        ppdb_dir='finetuning/PPDB-2.0-lexical.txt'
+    )
 
 if __name__ == "__main__":
-    neural()
-    bert()
+    pass
     
