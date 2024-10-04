@@ -20,8 +20,9 @@ from transformers import BertTokenizer, BertModel
 
 np.random.seed(69)
 random.seed(69)
-nltk.download('punkt')
-nltk.download('wordnet')
+nltk.download('punkt', quiet=True)
+nltk.download('wordnet', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 def ensure_relative_path(path):
     current_dir = os.path.dirname(__file__)
@@ -35,6 +36,7 @@ class SbertDataModule:
         self.test_data = self._load_data(ensure_relative_path(test_dir), tag='test')
         self.bt_data = self._load_data(ensure_relative_path(backTranslation_dir), tag='backTranslation')
         self.ppdb = self._load_ppdb(ensure_relative_path(ppdb_dir))
+        self.stop_words = set(stopwords.words('english'))
         
     def _load_data(self, filepath, tag):
         clean_data = {'Quality': [], '#1 ID': [], '#2 ID': [], '#1 String': [], '#2 String': [], 'Features': []}
@@ -137,6 +139,22 @@ class SbertDataModule:
                 synsets = wordnet.synsets(word)
                 if synsets:
                     synonym = random.choice(synsets).lemmas()[0].name() 
+                    new_words.append(synonym)
+                else:
+                    new_words.append(word)
+            else:
+                new_words.append(word)
+        return ' '.join(new_words)
+    
+    def _synonym_substitution_STOPWORD(self, sentence, p=0.25):
+        words = word_tokenize(sentence)
+        new_words = []
+        
+        for word in words:
+            if word.lower() not in self.stop_words and random.random() < p:
+                synsets = wordnet.synsets(word)
+                if synsets:
+                    synonym = random.choice(synsets).lemmas()[0].name()
                     new_words.append(synonym)
                 else:
                     new_words.append(word)
